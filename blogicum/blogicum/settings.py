@@ -26,14 +26,14 @@ SECRET_KEY = 'django-insecure-wdplnlj6jd!)m)y6b&%q42@!@!l@m!a882y4b9tyuoia@0c$fd
 DEBUG = True
 
 LOGIN_URL = 'login'
-LOGOUT_REDIRECT_URL = 'blog:index'
+LOGIN_REDIRECT_URL = 'blog:index'
 
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1'
 ]
 
-CSRF_FAILURL_VIEW = 'core.views.csrf_fail'
+CSRF_FAILURE_VIEW = 'pages.views.csrf_fail'
 
 # Application definition
 
@@ -70,10 +70,14 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = BASE_DIR / 'media' 
 
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATES_DIR],
+        'DIRS': (TEMPLATES_DIR,),
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

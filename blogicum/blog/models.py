@@ -1,6 +1,8 @@
 """Файл для создания таблиц базы данных."""
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+
 
 from core.models import PublishedModel
 
@@ -61,6 +63,7 @@ class Post(PublishedModel):
     pub_date = models.DateTimeField(
         'Дата и время публикации',
         blank=False,
+        default=timezone.now,
         help_text=(
             "Если установить дату и время в будущем — "
             "можно делать отложенные публикации."
@@ -86,7 +89,7 @@ class Post(PublishedModel):
         verbose_name='Категория',
         related_name='posts'
     )
-    #image = models.ImageField('Фото', upload_to='posts_images', blank=True)
+    image = models.ImageField('Фото', upload_to='posts_images', blank=True)
 
     class Meta:
         """Абстрактный класс Meta."""
@@ -97,3 +100,9 @@ class Post(PublishedModel):
     def __str__(self):
         """Магический метод str."""
         return self.title
+
+class Comment(models.Model):
+    text = models.TextField('Комментарий к посту')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE,null=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True,)
+    created_at = models.DateTimeField(auto_now_add=True)
