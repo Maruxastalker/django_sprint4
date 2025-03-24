@@ -101,8 +101,9 @@ class Post(PublishedModel):
         """Магический метод str."""
         return self.title
 
+
 class Comment(models.Model):
     text = models.TextField('Комментарий к посту')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE,null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True,)
     created_at = models.DateTimeField(auto_now_add=True)
