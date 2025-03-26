@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
-
 from core.models import PublishedModel
 
 User = get_user_model()
@@ -104,6 +103,23 @@ class Post(PublishedModel):
 
 class Comment(models.Model):
     text = models.TextField('Комментарий к посту')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True,)
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='comment'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name='comment'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return self.text

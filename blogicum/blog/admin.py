@@ -1,7 +1,7 @@
 """Настройка админ-зоны."""
 from django.contrib import admin
 
-from .models import Category, Location, Post
+from .models import Category, Location, Post, Comment
 
 admin.site.empty_value_display = 'Не задано'
 
@@ -32,6 +32,21 @@ class PostAdmin(admin.ModelAdmin):
     list_display_links = ('title', 'pub_date',)
 
 
+class CommentAdmin(admin.ModelAdmin):
+    list_display = (
+        'text',
+        'post',
+        'author',
+        'created_at',
+    )
+    search_fields = (
+        'author',
+        'post',
+    )
+    list_filter = ('created_at',)
+
+
 admin.site.register(Category)
 admin.site.register(Location)
 admin.site.register(Post, PostAdmin)
+admin.site.register(Comment, CommentAdmin)
