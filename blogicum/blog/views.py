@@ -44,6 +44,7 @@ def get_base_request(first_reason=False, second_reason=False):
 
 class PostCreateView(LoginRequiredMixin, CreateView):
     """CBV-класс, создающий публикацию."""
+
     form_class = PostForm
     template_name = 'blog/create.html'
 
@@ -60,6 +61,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
 class ProfileDetailView(ListView):
     """CBV-класс, показывающий данные пользователя."""
+
     paginate_by = settings.CONST_PAGINATE
     template_name = 'blog/profile.html'
     slug_url_kwarg = 'username'
@@ -86,6 +88,7 @@ class ProfileDetailView(ListView):
 
 class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     """CBV-класс, меняющий данные пользователя."""
+
     model = User
     form_class = UserChangeForm
     template_name = "blog/user.html"
@@ -147,6 +150,7 @@ def edit_comment(request, post_id, comment_id):
 
 class PostDetailView(DetailView):
     """CBV-класс, показывающий данные публикации."""
+
     model = Post
     template_name = 'blog/detail.html'
     context_object_name = 'post'
