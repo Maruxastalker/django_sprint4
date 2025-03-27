@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
 
 CSRF_FAILURE_VIEW = 'pages.views.csrf_fail'
 
-CONST_PAGINATE = 10
+HOW_MANY_PAGINATE = 10
 
 # Application definition
 

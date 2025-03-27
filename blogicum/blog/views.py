@@ -23,19 +23,19 @@ from .forms import PostForm, CommentForm
 User = get_user_model()
 
 
-def get_base_request(first_reason=False, second_reason=False):
-    """Базовая функция, возвращающая кверисет."""
-    now = timezone.now()
+def get_base_request(add_conditions=False, add_sorting=False):
+    """Базовая функция, возвращающая список с определенными условиями."""
     post_set = Post.objects.select_related(
         'author', 'location', 'category'
     )
-    if first_reason:
+    if add_conditions:
+        now = timezone.now()
         post_set = post_set.filter(
             is_published=True,
             category__is_published=True,
             pub_date__lte=now,
         )
-    if second_reason:
+    if add_sorting:
         post_set = post_set.order_by(
             '-pub_date'
         ).annotate(comment_count=Count('comment'))
@@ -62,7 +62,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 class ProfileDetailView(ListView):
     """CBV-класс, показывающий данные пользователя."""
 
-    paginate_by = settings.CONST_PAGINATE
+    paginate_by = settings.HOW_MANY_PAGINATE
     template_name = 'blog/profile.html'
     slug_url_kwarg = 'username'
     slug_field = 'username'
@@ -77,11 +77,11 @@ class ProfileDetailView(ListView):
 
     def get_queryset(self):
         user = self.get_object()
-        if self.request.user == user:
-            queryset = get_base_request(first_reason=False, second_reason=True)
-        else:
-            queryset = get_base_request(first_reason=True, second_reason=True)
 
+        queryset = get_base_request(
+            add_conditions=self.request.user != user,
+            add_sorting=True
+        )
         queryset = queryset.filter(author=user)
         return queryset
 
@@ -157,7 +157,11 @@ class PostDetailView(DetailView):
     pk_url_kwarg = 'post_id'
 
     def get_queryset(self):
-        return super().get_queryset().select_related('author', 'category')
+        return super().get_queryset().select_related(
+            'author',
+            'category',
+            'location'
+        )
 
     def get_object(self, queryset=None):
         post = super().get_object(queryset)
@@ -166,10 +170,11 @@ class PostDetailView(DetailView):
         is_published = post.is_published
         is_category_published = post.category and post.category.is_published
         is_future_post = post.pub_date > timezone.now()
-        last_part_condition = is_category_published or not is_future_post
 
-        if not (is_author or is_published and (last_part_condition)):
-            raise Http404("Вы не можете просматривать этот пост.")
+        if not (is_author or is_published and (
+            is_category_published or not is_future_post)
+        ):
+            raise Http404('Вы не можете просматривать этот пост.')
 
         return post
 
@@ -221,7 +226,8 @@ def post_delete(request, post_id):
 
 def paginate_view(request, some_object):
     """Общая функция для пагинации списка объектов."""
-    paginator = Paginator(some_object, 10)
+    paginate_value = settings.HOW_MANY_PAGINATE
+    paginator = Paginator(some_object, paginate_value)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -231,7 +237,7 @@ def paginate_view(request, some_object):
 def index(request):
     """Функция для запроса главной страницы."""
     template_name = 'blog/index.html'
-    post_list = get_base_request(first_reason=True, second_reason=True)
+    post_list = get_base_request(add_conditions=True, add_sorting=True)
     page_obj = paginate_view(request, post_list)
     context = {
         'page_obj': page_obj,
@@ -247,7 +253,7 @@ def category_posts(request, category_slug):
         slug=category_slug,
         is_published=True,
     )
-    post_list = get_base_request(first_reason=True, second_reason=True).filter(
+    post_list = get_base_request(add_conditions=True, add_sorting=True).filter(
         category__slug=category_slug
     )
     page_obj = page_obj = paginate_view(request, post_list)
