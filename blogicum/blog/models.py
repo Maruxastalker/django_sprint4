@@ -107,13 +107,13 @@ class Comment(models.Model):
         Post,
         on_delete=models.CASCADE,
         null=True,
-        related_name='comment'
+        related_name='comments'
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         null=True,
-        related_name='comment'
+        related_name='comments'
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -38,7 +38,7 @@ def get_base_request(add_conditions=False, add_sorting=False):
     if add_sorting:
         post_set = post_set.order_by(
             '-pub_date'
-        ).annotate(comment_count=Count('comment'))
+        ).annotate(comment_count=Count('comments'))
     return post_set
 
 
@@ -62,7 +62,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 class ProfileDetailView(ListView):
     """CBV-класс, показывающий данные пользователя."""
 
-    paginate_by = settings.HOW_MANY_PAGINATE
+    paginate_by = settings.COUNT_OBJECT_ON_PAGE
     template_name = 'blog/profile.html'
     slug_url_kwarg = 'username'
     slug_field = 'username'
@@ -181,7 +181,7 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = CommentForm(self.request.GET or None)
-        context['comments'] = Comment.objects.select_related(
+        context['comments'] = self.object.comments.select_related(
             'author'
         ).order_by('created_at')
         return context
@@ -224,9 +224,11 @@ def post_delete(request, post_id):
     return render(request, template_name, context)
 
 
-def paginate_view(request, some_object):
-    """Общая функция для пагинации списка объектов."""
-    paginate_value = settings.HOW_MANY_PAGINATE
+def paginate_view(
+    request,
+    some_object,
+    paginate_value=settings.COUNT_OBJECT_ON_PAGE
+):
     paginator = Paginator(some_object, paginate_value)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
